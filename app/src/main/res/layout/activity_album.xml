@@ -19,7 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:contentDescription="Add new photo"
+        android:contentDescription="@string/fab_add_photo_desc"
         android:src="@android:drawable/ic_input_add"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -30,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="16dp"
-        android:contentDescription="Move photo"
+        android:contentDescription="@string/fab_move_photo_desc"
         android:src="@android:drawable/ic_menu_directions"
         app:layout_constraintBottom_toTopOf="@id/addPhotoFab"
         app:layout_constraintEnd_toEndOf="parent" />

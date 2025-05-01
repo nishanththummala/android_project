@@ -11,7 +11,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:scaleType="fitCenter"
-        android:contentDescription="Full Photo" />
+        android:contentDescription="@string/full_photo_content_desc" />
 
     <TextView
         android:id="@+id/photoTagsTextView"
@@ -32,12 +32,12 @@
             android:id="@+id/prevPhotoButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Previous" />
+            android:text="@string/previous" />
         <Button
             android:id="@+id/nextPhotoButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Next" />
+            android:text="@string/next" />
     </LinearLayout>
 
     <LinearLayout
@@ -51,19 +51,19 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Enter tag value..." />
+            android:hint="@string/enter_tag_value" />
 
         <Button
             android:id="@+id/addPersonTagButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add Person" />
+            android:text="@string/add_person" />
 
         <Button
             android:id="@+id/addLocationTagButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Add Location" />
+            android:text="@string/add_location" />
     </LinearLayout>
 
     <ListView

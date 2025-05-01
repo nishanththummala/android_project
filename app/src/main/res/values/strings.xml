@@ -15,4 +15,19 @@
     <string name="delete_photo">Delete Photo</string>
     <string name="rename_album">Rename Album</string>
     <string name="delete_album">Delete Album</string>
+    <string name="search_photos_title">Search Photos by Tags</string>
+    <string name="enter_tag_value">Enter tag value...</string>
+    <string name="enter_second_tag">Enter second tag value (optional)</string>
+    <string name="search_and">Search AND</string>
+    <string name="search_or">Search OR</string>
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+    <string name="add_person">Add Person</string>
+    <string name="add_location">Add Location</string>
+    <string name="fab_add_album_desc">Add new album</string>
+    <string name="fab_search_desc">Search photos</string>
+    <string name="fab_add_photo_desc">Add new photo</string>
+    <string name="fab_move_photo_desc">Move photo</string>
+    <string name="photo_content_desc">Photo</string>
+    <string name="full_photo_content_desc">Full Photo</string>
 </resources> 

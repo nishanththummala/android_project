@@ -8,7 +8,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Search Photos by Tags"
+        android:text="@string/search_photos_title"
         android:textSize="20sp"
         android:textStyle="bold"
         android:gravity="center"
@@ -31,7 +31,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:hint="Enter tag value..."
+            android:hint="@string/enter_tag_value"
             android:completionThreshold="1" />
     </LinearLayout>
 
@@ -52,7 +52,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:hint="Enter second tag value (optional)"
+            android:hint="@string/enter_second_tag"
             android:completionThreshold="1" />
     </LinearLayout>
 
@@ -67,14 +67,14 @@
             android:id="@+id/searchAndButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Search AND"
+            android:text="@string/search_and"
             android:layout_marginEnd="8dp"/>
 
         <Button
             android:id="@+id/searchOrButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Search OR"
+            android:text="@string/search_or"
             android:layout_marginStart="8dp"/>
     </LinearLayout>
 
