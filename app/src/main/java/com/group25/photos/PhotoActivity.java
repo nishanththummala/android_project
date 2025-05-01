@@ -175,16 +175,29 @@ public class PhotoActivity extends AppCompatActivity {
     private void saveTagChange() {
         // Save the updated photo tags to storage
         if (allAlbums != null) {
+            boolean found = false;
             for (Album a : allAlbums) {
-                for (Photo p : a.getPhotos()) {
-                    if (p.getUri().equals(photo.getUri())) {
-                        p.getTags().clear();
-                        p.getTags().addAll(photo.getTags());
-                        break;
+                if (a.getName().equals(albumName)) {
+                    List<Photo> albumPhotos = a.getPhotos();
+                    for (int i = 0; i < albumPhotos.size(); i++) {
+                        Photo p = albumPhotos.get(i);
+                        if (p.getUri().equals(photo.getUri())) {
+                            // Replace the entire photo object to ensure all changes are saved
+                            albumPhotos.set(i, photo);
+                            found = true;
+                            break;
+                        }
                     }
+                    if (!found) {
+                        // If photo wasn't found in the album (shouldn't happen), add it
+                        a.addPhoto(photo);
+                    }
+                    break;
                 }
             }
+            // Save changes to storage
             StorageUtil.saveAlbums(this, allAlbums);
+            Toast.makeText(this, "Tags saved", Toast.LENGTH_SHORT).show();
         }
     }
 } 

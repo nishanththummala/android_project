@@ -17,7 +17,7 @@
         android:id="@+id/photoTagsTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Tags: "
+        android:text=""
         android:textSize="16sp"
         android:layout_marginTop="8dp"
         android:textColor="@android:color/black" />
@@ -51,7 +51,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:hint="Tag value" />
+            android:hint="Enter tag value..." />
 
         <Button
             android:id="@+id/addPersonTagButton"

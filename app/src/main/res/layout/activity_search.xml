@@ -5,50 +5,83 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <EditText
-        android:id="@+id/searchTagType"
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Tag type (person/location)" />
-
-    <EditText
-        android:id="@+id/searchTagValue"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Tag value" />
-
-    <EditText
-        android:id="@+id/searchTagType2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Second tag type (optional)" />
-
-    <EditText
-        android:id="@+id/searchTagValue2"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Second tag value (optional)" />
+        android:text="Search Photos by Tags"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="16dp"/>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center">
+        android:layout_marginBottom="8dp">
+
+        <Spinner
+            android:id="@+id/tagType1Spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <AutoCompleteTextView
+            android:id="@+id/searchValue1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:hint="Enter tag value..."
+            android:completionThreshold="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="16dp">
+
+        <Spinner
+            android:id="@+id/tagType2Spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1" />
+
+        <AutoCompleteTextView
+            android:id="@+id/searchValue2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:hint="Enter second tag value (optional)"
+            android:completionThreshold="1" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginBottom="16dp">
+
         <Button
             android:id="@+id/searchAndButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Search AND" />
+            android:text="Search AND"
+            android:layout_marginEnd="8dp"/>
+
         <Button
             android:id="@+id/searchOrButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Search OR" />
+            android:text="Search OR"
+            android:layout_marginStart="8dp"/>
     </LinearLayout>
 
     <ListView
         android:id="@+id/searchResultsList"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
 
 </LinearLayout> 

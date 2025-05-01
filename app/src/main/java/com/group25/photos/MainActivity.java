@@ -1,5 +1,6 @@
 package com.group25.photos;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +25,7 @@ public class MainActivity extends AppCompatActivity {
         // Initialize views
         albumsRecyclerView = findViewById(R.id.albumsRecyclerView);
         FloatingActionButton addAlbumFab = findViewById(R.id.addAlbumFab);
+        FloatingActionButton searchFab = findViewById(R.id.searchFab);
 
         // Setup RecyclerView
         albums = new ArrayList<>();
@@ -34,8 +36,12 @@ public class MainActivity extends AppCompatActivity {
         // Load saved albums
         loadAlbums();
 
-        // Setup FAB click listener
+        // Setup FAB click listeners
         addAlbumFab.setOnClickListener(v -> showAddAlbumDialog());
+        searchFab.setOnClickListener(v -> {
+            Intent intent = new Intent(MainActivity.this, SearchActivity.class);
+            startActivity(intent);
+        });
     }
 
     private void loadAlbums() {
@@ -70,4 +76,4 @@ public class MainActivity extends AppCompatActivity {
         albumAdapter.notifyItemInserted(albums.size() - 1);
         StorageUtil.saveAlbums(this, albums);
     }
-} 
+}

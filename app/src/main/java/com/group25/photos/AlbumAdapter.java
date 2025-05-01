@@ -1,4 +1,4 @@
-package com.group25.photos;
+ package com.group25.photos;
 
 import android.content.Context;
 import android.content.Intent;
