@@ -22,6 +22,3 @@ This is an Android port of the JavaFX Photos project for CS213 Assignment 4.
 - All UI is built with Android XML layouts
 - No third-party image libraries (Picasso, Glide, etc.) are used
 - Data persistence and photo picking are marked as TODOs
-
-## GenAI Usage
-Some code and structure was generated with the help of GenAI (ChatGPT). All code was reviewed and adapted for this project. 
