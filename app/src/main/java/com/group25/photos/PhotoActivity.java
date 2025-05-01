@@ -7,6 +7,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
@@ -20,14 +21,16 @@ public class PhotoActivity extends AppCompatActivity {
     private List<Photo> albumPhotos;
     private int currentIndex;
     private String albumName;
+    private ImageView imageView;
+    private TextView tagsTextView;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo);
 
-        ImageView imageView = findViewById(R.id.fullPhotoImageView);
-        TextView tagsTextView = findViewById(R.id.photoTagsTextView);
+        imageView = findViewById(R.id.fullPhotoImageView);
+        tagsTextView = findViewById(R.id.photoTagsTextView);
         Button prevButton = findViewById(R.id.prevPhotoButton);
         Button nextButton = findViewById(R.id.nextPhotoButton);
 
@@ -46,6 +49,7 @@ public class PhotoActivity extends AppCompatActivity {
                 }
             }
         }
+        
         // Find the index of the current photo
         for (int i = 0; i < albumPhotos.size(); i++) {
             if (albumPhotos.get(i).getUri().equals(uri)) {
@@ -53,6 +57,7 @@ public class PhotoActivity extends AppCompatActivity {
                 break;
             }
         }
+        
         if (albumPhotos.isEmpty()) {
             photo = new Photo(uri);
             albumPhotos.add(photo);
@@ -61,34 +66,29 @@ public class PhotoActivity extends AppCompatActivity {
             photo = albumPhotos.get(currentIndex);
         }
 
+        // Update navigation button states
+        updateNavigationButtons(prevButton, nextButton);
+
         // Helper to update UI for current photo
         Runnable updatePhotoUI = () -> {
             imageView.setImageURI(android.net.Uri.parse(photo.getUri()));
-            // Show tags as text
-            StringBuilder sb = new StringBuilder();
-            sb.append("Tags: ");
-            for (Photo.Tag tag : photo.getTags()) {
-                sb.append(tag.getType()).append(": ").append(tag.getValue()).append("; ");
-            }
-            tagsTextView.setText(sb.toString());
-            // Update tag list
-            tagStrings.clear();
-            for (Photo.Tag tag : photo.getTags()) {
-                tagStrings.add(tag.getType() + ": " + tag.getValue());
-            }
-            tagAdapter.notifyDataSetChanged();
+            updateTagsDisplay();
+            updateNavigationButtons(prevButton, nextButton);
+            // Show current photo position
+            setTitle(String.format("Photo %d of %d", currentIndex + 1, albumPhotos.size()));
         };
 
         prevButton.setOnClickListener(v -> {
-            if (albumPhotos.size() > 0) {
-                currentIndex = (currentIndex - 1 + albumPhotos.size()) % albumPhotos.size();
+            if (currentIndex > 0) {
+                currentIndex--;
                 photo = albumPhotos.get(currentIndex);
                 updatePhotoUI.run();
             }
         });
+
         nextButton.setOnClickListener(v -> {
-            if (albumPhotos.size() > 0) {
-                currentIndex = (currentIndex + 1) % albumPhotos.size();
+            if (currentIndex < albumPhotos.size() - 1) {
+                currentIndex++;
                 photo = albumPhotos.get(currentIndex);
                 updatePhotoUI.run();
             }
@@ -112,10 +112,12 @@ public class PhotoActivity extends AppCompatActivity {
                 Photo.Tag tag = new Photo.Tag(Photo.Tag.Type.PERSON, value);
                 if (!photo.getTags().contains(tag)) {
                     photo.addTag(tag);
-                    tagStrings.add("PERSON: " + value);
-                    tagAdapter.notifyDataSetChanged();
+                    updateTagsDisplay();
                     saveTagChange();
-                    updatePhotoUI.run();
+                    tagValueEditText.setText("");
+                    Toast.makeText(this, "Person tag added", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Tag already exists", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -126,25 +128,48 @@ public class PhotoActivity extends AppCompatActivity {
                 Photo.Tag tag = new Photo.Tag(Photo.Tag.Type.LOCATION, value);
                 if (!photo.getTags().contains(tag)) {
                     photo.addTag(tag);
-                    tagStrings.add("LOCATION: " + value);
-                    tagAdapter.notifyDataSetChanged();
+                    updateTagsDisplay();
                     saveTagChange();
-                    updatePhotoUI.run();
+                    tagValueEditText.setText("");
+                    Toast.makeText(this, "Location tag added", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(this, "Tag already exists", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
         tagsListView.setOnItemLongClickListener((parent, view, position, id) -> {
             photo.getTags().remove(position);
-            tagStrings.remove(position);
-            tagAdapter.notifyDataSetChanged();
+            updateTagsDisplay();
             saveTagChange();
-            updatePhotoUI.run();
+            Toast.makeText(this, "Tag removed", Toast.LENGTH_SHORT).show();
             return true;
         });
 
         // Initial UI update
         updatePhotoUI.run();
+    }
+
+    private void updateNavigationButtons(Button prevButton, Button nextButton) {
+        prevButton.setEnabled(currentIndex > 0);
+        nextButton.setEnabled(currentIndex < albumPhotos.size() - 1);
+    }
+
+    private void updateTagsDisplay() {
+        // Update the tags TextView
+        StringBuilder sb = new StringBuilder();
+        sb.append("Tags: ");
+        for (Photo.Tag tag : photo.getTags()) {
+            sb.append(tag.getType()).append(": ").append(tag.getValue()).append("; ");
+        }
+        tagsTextView.setText(sb.toString());
+
+        // Update the tags ListView
+        tagStrings.clear();
+        for (Photo.Tag tag : photo.getTags()) {
+            tagStrings.add(tag.getType() + ": " + tag.getValue());
+        }
+        tagAdapter.notifyDataSetChanged();
     }
 
     private void saveTagChange() {

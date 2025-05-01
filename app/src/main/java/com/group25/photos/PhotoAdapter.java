@@ -40,6 +40,10 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHol
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, PhotoActivity.class);
             intent.putExtra("photo_uri", photo.getUri());
+            if (context instanceof AlbumActivity) {
+                String albumName = ((AlbumActivity) context).getAlbumName();
+                intent.putExtra("album_name", albumName);
+            }
             context.startActivity(intent);
         });
         holder.itemView.setOnLongClickListener(v -> {

@@ -59,6 +59,7 @@ public class AlbumActivity extends AppCompatActivity implements PhotoAdapter.OnP
     private void pickPhoto() {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.setType("image/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(intent, PICK_PHOTO_REQUEST);
     }
 
@@ -66,8 +67,16 @@ public class AlbumActivity extends AppCompatActivity implements PhotoAdapter.OnP
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PICK_PHOTO_REQUEST && resultCode == RESULT_OK && data != null) {
-            String uri = data.getData().toString();
-            Photo newPhoto = new Photo(uri);
+            Uri uri = data.getData();
+            // Persist URI permission
+            final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+            try {
+                getContentResolver().takePersistableUriPermission(uri, takeFlags);
+            } catch (SecurityException e) {
+                e.printStackTrace();
+                Toast.makeText(this, "Could not persist permission for photo", Toast.LENGTH_SHORT).show();
+            }
+            Photo newPhoto = new Photo(uri.toString());
             photos.add(newPhoto);
             photoAdapter.notifyItemInserted(photos.size() - 1);
             StorageUtil.saveAlbums(this, allAlbums);
@@ -121,5 +130,9 @@ public class AlbumActivity extends AppCompatActivity implements PhotoAdapter.OnP
                 StorageUtil.saveAlbums(this, allAlbums);
             })
             .show();
+    }
+
+    public String getAlbumName() {
+        return albumName;
     }
 } 
