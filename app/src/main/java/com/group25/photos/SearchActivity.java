@@ -146,15 +146,20 @@ public class SearchActivity extends AppCompatActivity {
         }
 
         resultsAdapter.clear();
-        List<Photo> results = searchPhotos(isAnd, type1, value1.toLowerCase(), type2, value2.toLowerCase());
-        for (Photo p : results) {
-            resultsAdapter.add(p.getUri());
-        }
-        resultsAdapter.notifyDataSetChanged();
-
+        List<Photo> results = searchPhotos(isAnd, type1, value1, type2, value2);
         if (results.isEmpty()) {
             Toast.makeText(this, "No matches found", Toast.LENGTH_SHORT).show();
+            return;
         }
+
+        // Create a custom adapter to show photo thumbnails instead of URIs
+        PhotoListAdapter photoListAdapter = new PhotoListAdapter(this, results);
+        ListView searchResultsList = findViewById(R.id.searchResultsList);
+        searchResultsList.setAdapter(photoListAdapter);
+        searchResultsList.setOnItemClickListener((parent, view, position, id) -> {
+            Photo photo = results.get(position);
+            launchPhotoView(photo.getUri());
+        });
     }
 
     private List<Photo> searchPhotos(boolean and, String type1, String value1, String type2, String value2) {
@@ -179,9 +184,11 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private boolean matchesTag(Photo photo, String type, String value) {
+        if (value.isEmpty()) return false;
+        
         for (Photo.Tag tag : photo.getTags()) {
             if (tag.getType().toString().equals(type) &&
-                tag.getValue().toLowerCase().startsWith(value)) {
+                tag.getValue().toLowerCase().startsWith(value.toLowerCase())) {
                 return true;
             }
         }
