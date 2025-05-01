@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <ImageView
+        android:id="@+id/fullPhotoImageView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scaleType="fitCenter"
+        android:contentDescription="Full Photo" />
+
+    <TextView
+        android:id="@+id/photoTagsTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tags: "
+        android:textSize="16sp"
+        android:layout_marginTop="8dp"
+        android:textColor="@android:color/black" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="8dp">
+        <Button
+            android:id="@+id/prevPhotoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Previous" />
+        <Button
+            android:id="@+id/nextPhotoButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Next" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="8dp">
+
+        <EditText
+            android:id="@+id/tagValueEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Tag value" />
+
+        <Button
+            android:id="@+id/addPersonTagButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Person" />
+
+        <Button
+            android:id="@+id/addLocationTagButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Add Location" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/tagsListView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"/>
+
+</LinearLayout> 

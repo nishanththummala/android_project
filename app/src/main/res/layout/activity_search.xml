@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <EditText
+        android:id="@+id/searchTagType"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Tag type (person/location)" />
+
+    <EditText
+        android:id="@+id/searchTagValue"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Tag value" />
+
+    <EditText
+        android:id="@+id/searchTagType2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Second tag type (optional)" />
+
+    <EditText
+        android:id="@+id/searchTagValue2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Second tag value (optional)" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <Button
+            android:id="@+id/searchAndButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Search AND" />
+        <Button
+            android:id="@+id/searchOrButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Search OR" />
+    </LinearLayout>
+
+    <ListView
+        android:id="@+id/searchResultsList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+</LinearLayout> 
