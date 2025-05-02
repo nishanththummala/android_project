@@ -26,7 +26,7 @@
             android:parentActivityName=".MainActivity" />
         <activity 
             android:name=".PhotoActivity" 
-             /> 
+            android:parentActivityName=".AlbumActivity" /> 
              <!-- Optional: Add parentActivityName=".AlbumActivity" if desired -->
         <activity 
             android:name=".SearchActivity" 

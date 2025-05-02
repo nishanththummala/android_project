@@ -1,12 +1,14 @@
 package com.group25.photos;
 
 import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.ImageView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
@@ -27,6 +29,11 @@ public class PhotoActivity extends AppCompatActivity implements TagAdapter.OnTag
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo);
+
+        // Enable the Up button
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         imageView = findViewById(R.id.fullPhotoImageView);
         tagsTextView = findViewById(R.id.photoTagsTextView);
@@ -175,5 +182,16 @@ public class PhotoActivity extends AppCompatActivity implements TagAdapter.OnTag
             }
         }
         return -1;
+    }
+
+    // Handle Up button press
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Navigate back to parent activity (AlbumActivity as defined in Manifest)
+            finish(); // Simple finish() is usually sufficient
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 } 
