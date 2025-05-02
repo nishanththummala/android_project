@@ -3,6 +3,7 @@ package com.group25.photos;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,7 +13,7 @@ import android.widget.EditText;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AlbumAdapter.AlbumActionListener {
     private RecyclerView albumsRecyclerView;
     private AlbumAdapter albumAdapter;
     private List<Album> albums;
@@ -29,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Setup RecyclerView
         albums = new ArrayList<>();
-        albumAdapter = new AlbumAdapter(this, albums);
+        albumAdapter = new AlbumAdapter(this, albums, this);
         albumsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         albumsRecyclerView.setAdapter(albumAdapter);
 
@@ -42,6 +43,12 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent(MainActivity.this, SearchActivity.class);
             startActivity(intent);
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadAlbums(); // Reload albums and update the adapter
     }
 
     private void loadAlbums() {
@@ -63,7 +70,20 @@ public class MainActivity extends AppCompatActivity {
                 .setPositiveButton("Create", (dialog, which) -> {
                     String albumName = input.getText().toString().trim();
                     if (!albumName.isEmpty()) {
-                        createNewAlbum(albumName);
+                        boolean nameExists = false;
+                        for (Album album : albums) {
+                            if (album.getName().equalsIgnoreCase(albumName)) {
+                                nameExists = true;
+                                break;
+                            }
+                        }
+                        if (nameExists) {
+                            Toast.makeText(this, "Album name already exists", Toast.LENGTH_SHORT).show();
+                        } else {
+                            createNewAlbum(albumName);
+                        }
+                    } else {
+                        Toast.makeText(this, "Album name cannot be empty", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -73,7 +93,34 @@ public class MainActivity extends AppCompatActivity {
     private void createNewAlbum(String albumName) {
         Album newAlbum = new Album(albumName);
         albums.add(newAlbum);
-        albumAdapter.notifyItemInserted(albums.size() - 1);
+        if (albums.size() == 1) {
+            albumAdapter.notifyDataSetChanged();
+        } else {
+            albumAdapter.notifyItemInserted(albums.size() - 1);
+        }
         StorageUtil.saveAlbums(this, albums);
+        Toast.makeText(this, "Album '" + albumName + "' created", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onRenameAlbum(int position, String newName) {
+        if (position >= 0 && position < albums.size()) {
+            albums.get(position).setName(newName);
+            albumAdapter.notifyItemChanged(position);
+            StorageUtil.saveAlbums(this, albums);
+            Toast.makeText(this, "Album renamed to '" + newName + "'", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    @Override
+    public void onDeleteAlbum(int position) {
+        if (position >= 0 && position < albums.size()) {
+            String deletedAlbumName = albums.get(position).getName();
+            albums.remove(position);
+            albumAdapter.notifyItemRemoved(position);
+            albumAdapter.notifyItemRangeChanged(position, albums.size() - position);
+            StorageUtil.saveAlbums(this, albums);
+            Toast.makeText(this, "Album '" + deletedAlbumName + "' deleted", Toast.LENGTH_SHORT).show();
+        }
     }
 }

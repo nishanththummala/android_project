@@ -21,9 +21,16 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".AlbumActivity" />
-        <activity android:name=".PhotoActivity" />
-        <activity android:name=".SearchActivity" />
+        <activity 
+            android:name=".AlbumActivity" 
+            android:parentActivityName=".MainActivity" />
+        <activity 
+            android:name=".PhotoActivity" 
+             /> 
+             <!-- Optional: Add parentActivityName=".AlbumActivity" if desired -->
+        <activity 
+            android:name=".SearchActivity" 
+            android:parentActivityName=".MainActivity" />
     </application>
 
 </manifest> 

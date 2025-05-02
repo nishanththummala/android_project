@@ -3,12 +3,14 @@ package com.group25.photos;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
@@ -29,6 +31,12 @@ public class SearchActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
+        setTitle("Search Photos");
+
+        // Enable the Up button
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
 
         // Initialize tag value sets
         existingPersonTags = new HashSet<>();
@@ -166,16 +174,39 @@ public class SearchActivity extends AppCompatActivity {
         List<Album> allAlbums = StorageUtil.loadAlbums(this);
         Set<Photo> resultSet = new HashSet<>();
         
+        // Determine search mode based on whether one or both values are provided
+        boolean isSingleTagSearch = value1.isEmpty() ^ value2.isEmpty(); // XOR: true if exactly one is non-empty
+        boolean usePrefix = isSingleTagSearch; // Use prefix only for single tag searches
+
         if (allAlbums != null) {
             for (Album album : allAlbums) {
                 for (Photo photo : album.getPhotos()) {
-                    boolean match1 = value1.isEmpty() || matchesTag(photo, type1, value1);
-                    boolean match2 = value2.isEmpty() || matchesTag(photo, type2, value2);
+                    // Pass the correct prefix flag to matchesTag
+                    boolean match1 = value1.isEmpty() || matchesTag(photo, type1, value1, usePrefix);
+                    // For AND/OR searches (not single tag), always use exact match (usePrefix=false)
+                    boolean match2 = value2.isEmpty() || matchesTag(photo, type2, value2, usePrefix && value1.isEmpty()); 
+                    // Correction: If value1 is NOT empty, value2 MUST use exact match if part of a two-term search.
+                    // Let's simplify: Determine prefix mode *per field* based on whether it's the ONLY field used.
                     
-                    if (and && match1 && match2) {
-                        resultSet.add(photo);
-                    } else if (!and && (match1 || match2)) {
-                        resultSet.add(photo);
+                    boolean usePrefix1 = !value1.isEmpty() && value2.isEmpty();
+                    boolean usePrefix2 = !value2.isEmpty() && value1.isEmpty();
+                    
+                    boolean currentMatch1 = value1.isEmpty() || matchesTag(photo, type1, value1, usePrefix1);
+                    boolean currentMatch2 = value2.isEmpty() || matchesTag(photo, type2, value2, usePrefix2);
+
+                    
+                    if (and) { // Conjunction (AND)
+                        // Both terms must match (using their respective prefix/exact mode)
+                        // Note: If a value is empty, its match is considered true
+                        if (currentMatch1 && currentMatch2) {
+                            resultSet.add(photo);
+                        }
+                    } else { // Disjunction (OR)
+                         // At least one term must match (using its respective prefix/exact mode)
+                         // This handles single term searches implicitly as well.
+                        if (currentMatch1 || currentMatch2) {
+                             resultSet.add(photo);
+                        }
                     }
                 }
             }
@@ -183,13 +214,30 @@ public class SearchActivity extends AppCompatActivity {
         return new ArrayList<>(resultSet);
     }
 
-    private boolean matchesTag(Photo photo, String type, String value) {
-        if (value.isEmpty()) return false;
+    // Updated matchesTag to support exact or prefix matching
+    private boolean matchesTag(Photo photo, String type, String value, boolean isPrefixSearch) {
+        if (value.isEmpty()) return false; // Should not happen if called correctly, but safe check
         
+        Photo.Tag.Type searchType;
+        try {
+            searchType = Photo.Tag.Type.valueOf(type); // Convert string back to enum
+        } catch (IllegalArgumentException e) {
+            return false; // Invalid type string
+        }
+
         for (Photo.Tag tag : photo.getTags()) {
-            if (tag.getType().toString().equals(type) &&
-                tag.getValue().toLowerCase().startsWith(value.toLowerCase())) {
-                return true;
+            // Check type first
+            if (tag.getType() == searchType) {
+                 // Then check value based on search mode
+                if (isPrefixSearch) {
+                    if (tag.getValue().toLowerCase().startsWith(value.toLowerCase())) {
+                        return true;
+                    }
+                } else {
+                    if (tag.getValue().equalsIgnoreCase(value)) {
+                        return true;
+                    }
+                }
             }
         }
         return false;
@@ -212,5 +260,16 @@ public class SearchActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+    // Handle Up button press
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            // Navigate back to parent activity (MainActivity as defined in Manifest)
+            finish(); // Simple finish()
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 } 

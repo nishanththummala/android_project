@@ -3,14 +3,24 @@ package com.group25.photos;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Photo implements Serializable {
+    private static final long serialVersionUID = 1L;
     private String uri;
     private List<Tag> tags;
 
     public Photo(String uri) {
         this.uri = uri;
         this.tags = new ArrayList<>();
+    }
+
+    public Photo(Photo other) {
+        this.uri = other.uri;
+        this.tags = new ArrayList<>();
+        for (Tag tag : other.tags) {
+            this.tags.add(new Tag(tag.getType(), tag.getValue()));
+        }
     }
 
     public String getUri() {
@@ -22,14 +32,30 @@ public class Photo implements Serializable {
     }
 
     public void addTag(Tag tag) {
-        tags.add(tag);
+        if (!this.tags.contains(tag)) {
+            tags.add(tag);
+        }
     }
 
     public void removeTag(Tag tag) {
         tags.remove(tag);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Photo photo = (Photo) o;
+        return Objects.equals(uri, photo.uri);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(uri);
+    }
+
     public static class Tag implements Serializable {
+        private static final long serialVersionUID = 1L;
         public enum Type {
             PERSON,
             LOCATION
@@ -61,7 +87,7 @@ public class Photo implements Serializable {
 
         @Override
         public int hashCode() {
-            return 31 * type.hashCode() + value.toLowerCase().hashCode();
+            return Objects.hash(type, value.toLowerCase());
         }
     }
 } 

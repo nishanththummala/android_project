@@ -14,6 +14,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
+    <!-- TextView for empty state -->
+    <TextView
+        android:id="@+id/emptyAlbumTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="This album is empty. Add photos using the + button."
+        android:textSize="16sp"
+        android:visibility="gone" 
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/addPhotoFab"
         android:layout_width="wrap_content"
@@ -25,6 +38,7 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Optional: Move photo FAB, can be hidden or not used -->
+    <!-- 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/movePhotoFab"
         android:layout_width="wrap_content"
@@ -34,5 +48,6 @@
         android:src="@android:drawable/ic_menu_directions"
         app:layout_constraintBottom_toTopOf="@id/addPhotoFab"
         app:layout_constraintEnd_toEndOf="parent" />
+    -->
 
 </androidx.constraintlayout.widget.ConstraintLayout> 

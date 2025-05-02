@@ -5,7 +5,6 @@ import android.widget.ImageView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
@@ -13,10 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PhotoActivity extends AppCompatActivity {
+public class PhotoActivity extends AppCompatActivity implements TagAdapter.OnTagDeleteListener {
     private Photo photo;
-    private ArrayAdapter<String> tagAdapter;
-    private ArrayList<String> tagStrings;
+    private TagAdapter tagAdapter;
+    private List<Photo.Tag> photoTags;
     private List<Album> allAlbums;
     private List<Photo> albumPhotos;
     private int currentIndex;
@@ -38,7 +37,7 @@ public class PhotoActivity extends AppCompatActivity {
         albumName = getIntent().getStringExtra("album_name");
         allAlbums = StorageUtil.loadAlbums(this);
         albumPhotos = new ArrayList<>();
-        currentIndex = 0;
+        currentIndex = -1;
 
         // Find the album and photo list
         if (allAlbums != null && albumName != null) {
@@ -50,31 +49,40 @@ public class PhotoActivity extends AppCompatActivity {
             }
         }
         
-        // Find the index of the current photo
-        for (int i = 0; i < albumPhotos.size(); i++) {
-            if (albumPhotos.get(i).getUri().equals(uri)) {
-                currentIndex = i;
-                break;
+        // Find the current photo object in the specific album's list
+        if (!albumPhotos.isEmpty() && uri != null) {
+             for (int i = 0; i < albumPhotos.size(); i++) {
+                if (albumPhotos.get(i).getUri().equals(uri)) {
+                    photo = albumPhotos.get(i);
+                    currentIndex = i;
+                    break;
+                }
             }
         }
-        
-        if (albumPhotos.isEmpty()) {
-            photo = new Photo(uri);
-            albumPhotos.add(photo);
-            currentIndex = 0;
-        } else {
-            photo = albumPhotos.get(currentIndex);
+
+        // Handle case where photo wasn't found or list is empty
+        if (photo == null) {
+             Toast.makeText(this, "Error: Photo not found in album.", Toast.LENGTH_LONG).show();
+             if (uri != null) {
+                 photo = new Photo(uri);
+             } else {
+                 finish(); 
+                 return;
+             }
         }
+        
+        photoTags = photo.getTags();
 
         // Update navigation button states
         updateNavigationButtons(prevButton, nextButton);
 
         // Helper to update UI for current photo
         Runnable updatePhotoUI = () -> {
+            if (photo == null) return;
             imageView.setImageURI(android.net.Uri.parse(photo.getUri()));
+            photoTags = photo.getTags();
             updateTagsDisplay();
             updateNavigationButtons(prevButton, nextButton);
-            // Show current photo position
             setTitle(String.format("Photo %d of %d", currentIndex + 1, albumPhotos.size()));
         };
 
@@ -99,55 +107,30 @@ public class PhotoActivity extends AppCompatActivity {
         Button addLocationTagButton = findViewById(R.id.addLocationTagButton);
         ListView tagsListView = findViewById(R.id.tagsListView);
 
-        tagStrings = new ArrayList<>();
-        for (Photo.Tag tag : photo.getTags()) {
-            tagStrings.add(tag.getType() + ": " + tag.getValue());
-        }
-        tagAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, tagStrings);
+        tagAdapter = new TagAdapter(this, photoTags, this);
         tagsListView.setAdapter(tagAdapter);
 
-        addPersonTagButton.setOnClickListener(v -> {
-            String value = tagValueEditText.getText().toString().trim();
-            if (!value.isEmpty()) {
-                Photo.Tag tag = new Photo.Tag(Photo.Tag.Type.PERSON, value);
-                if (!photo.getTags().contains(tag)) {
-                    photo.addTag(tag);
-                    updateTagsDisplay();
-                    saveTagChange();
-                    tagValueEditText.setText("");
-                    Toast.makeText(this, "Person tag added", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Tag already exists", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        addLocationTagButton.setOnClickListener(v -> {
-            String value = tagValueEditText.getText().toString().trim();
-            if (!value.isEmpty()) {
-                Photo.Tag tag = new Photo.Tag(Photo.Tag.Type.LOCATION, value);
-                if (!photo.getTags().contains(tag)) {
-                    photo.addTag(tag);
-                    updateTagsDisplay();
-                    saveTagChange();
-                    tagValueEditText.setText("");
-                    Toast.makeText(this, "Location tag added", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(this, "Tag already exists", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
-
-        tagsListView.setOnItemLongClickListener((parent, view, position, id) -> {
-            photo.getTags().remove(position);
-            updateTagsDisplay();
-            saveTagChange();
-            Toast.makeText(this, "Tag removed", Toast.LENGTH_SHORT).show();
-            return true;
-        });
+        addPersonTagButton.setOnClickListener(v -> addTag(Photo.Tag.Type.PERSON, tagValueEditText));
+        addLocationTagButton.setOnClickListener(v -> addTag(Photo.Tag.Type.LOCATION, tagValueEditText));
 
         // Initial UI update
         updatePhotoUI.run();
+    }
+
+    private void addTag(Photo.Tag.Type type, EditText editText) {
+        String value = editText.getText().toString().trim();
+        if (!value.isEmpty()) {
+            Photo.Tag tag = new Photo.Tag(type, value);
+            if (!photoTags.contains(tag)) {
+                photo.addTag(tag);
+                updateTagsDisplay();
+                saveTagChange();
+                editText.setText("");
+                Toast.makeText(this, type + " tag added", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Tag already exists", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void updateNavigationButtons(Button prevButton, Button nextButton) {
@@ -156,48 +139,41 @@ public class PhotoActivity extends AppCompatActivity {
     }
 
     private void updateTagsDisplay() {
-        // Update the tags TextView
         StringBuilder sb = new StringBuilder();
         sb.append("Tags: ");
-        for (Photo.Tag tag : photo.getTags()) {
+        for (Photo.Tag tag : photoTags) {
             sb.append(tag.getType()).append(": ").append(tag.getValue()).append("; ");
         }
         tagsTextView.setText(sb.toString());
 
-        // Update the tags ListView
-        tagStrings.clear();
-        for (Photo.Tag tag : photo.getTags()) {
-            tagStrings.add(tag.getType() + ": " + tag.getValue());
-        }
         tagAdapter.notifyDataSetChanged();
     }
 
-    private void saveTagChange() {
-        // Save the updated photo tags to storage
-        if (allAlbums != null) {
-            boolean found = false;
-            for (Album a : allAlbums) {
-                if (a.getName().equals(albumName)) {
-                    List<Photo> albumPhotos = a.getPhotos();
-                    for (int i = 0; i < albumPhotos.size(); i++) {
-                        Photo p = albumPhotos.get(i);
-                        if (p.getUri().equals(photo.getUri())) {
-                            // Replace the entire photo object to ensure all changes are saved
-                            albumPhotos.set(i, photo);
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (!found) {
-                        // If photo wasn't found in the album (shouldn't happen), add it
-                        a.addPhoto(photo);
-                    }
-                    break;
-                }
-            }
-            // Save changes to storage
-            StorageUtil.saveAlbums(this, allAlbums);
-            Toast.makeText(this, "Tags saved", Toast.LENGTH_SHORT).show();
+    @Override
+    public void onTagDelete(int position) {
+        if (position >= 0 && position < photoTags.size()) {
+            photoTags.remove(position);
+            updateTagsDisplay();
+            saveTagChange();
+            Toast.makeText(this, "Tag removed", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void saveTagChange() {
+        if (allAlbums != null && currentAlbumIndex() != -1) {
+            StorageUtil.saveAlbums(this, allAlbums);
+        } else {
+             Toast.makeText(this, "Error saving tag changes.", Toast.LENGTH_SHORT).show();
+        }
+    }
+    
+    private int currentAlbumIndex() {
+        if (allAlbums == null || albumName == null) return -1;
+        for (int i = 0; i < allAlbums.size(); i++) {
+            if (allAlbums.get(i).getName().equals(albumName)) {
+                return i;
+            }
+        }
+        return -1;
     }
 } 

@@ -1,12 +1,15 @@
- package com.group25.photos;
+package com.group25.photos;
 
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.List;
 
@@ -14,9 +17,17 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
     private Context context;
     private List<Album> albums;
 
-    public AlbumAdapter(Context context, List<Album> albums) {
+    // Interface for callbacks to MainActivity
+    public interface AlbumActionListener {
+        void onRenameAlbum(int position, String newName);
+        void onDeleteAlbum(int position);
+    }
+    private AlbumActionListener actionListener;
+
+    public AlbumAdapter(Context context, List<Album> albums, AlbumActionListener listener) {
         this.context = context;
         this.albums = albums;
+        this.actionListener = listener; // Assign listener
     }
 
     @NonNull
@@ -30,7 +41,7 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
     public void onBindViewHolder(@NonNull AlbumViewHolder holder, int position) {
         Album album = albums.get(position);
         holder.albumName.setText(album.getName());
-        holder.photoCount.setText(album.getPhotoCount() + " photos");
+        holder.photoCount.setText(String.format("%d photos", album.getPhotoCount()));
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(context, AlbumActivity.class);
@@ -38,43 +49,51 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
             context.startActivity(intent);
         });
 
-        holder.itemView.setOnLongClickListener(v -> {
-            new android.app.AlertDialog.Builder(context)
-                .setTitle("Album Options")
-                .setItems(new String[]{"Rename", "Delete"}, (dialog, which) -> {
-                    if (which == 0) {
-                        // Rename
-                        android.widget.EditText input = new android.widget.EditText(context);
-                        input.setText(album.getName());
-                        new android.app.AlertDialog.Builder(context)
-                            .setTitle("Rename Album")
-                            .setView(input)
-                            .setPositiveButton("Rename", (d, w) -> {
-                                String newName = input.getText().toString().trim();
-                                if (!newName.isEmpty()) {
-                                    album.setName(newName);
-                                    notifyItemChanged(position);
-                                    StorageUtil.saveAlbums(context, albums);
+        holder.renameButton.setOnClickListener(v -> {
+            EditText input = new EditText(context);
+            input.setText(album.getName());
+            new AlertDialog.Builder(context)
+                    .setTitle("Rename Album")
+                    .setView(input)
+                    .setPositiveButton("Rename", (dialog, which) -> {
+                        String newName = input.getText().toString().trim();
+                        if (!newName.isEmpty() && !newName.equals(album.getName())) {
+                            // Check if new name already exists
+                            boolean nameExists = false;
+                            for(Album existingAlbum : albums) {
+                                if (existingAlbum.getName().equalsIgnoreCase(newName)) {
+                                    nameExists = true;
+                                    break;
                                 }
-                            })
-                            .setNegativeButton("Cancel", null)
-                            .show();
-                    } else if (which == 1) {
-                        // Delete
-                        new android.app.AlertDialog.Builder(context)
-                            .setTitle("Delete Album")
-                            .setMessage("Are you sure you want to delete this album?")
-                            .setPositiveButton("Delete", (d, w) -> {
-                                albums.remove(position);
-                                notifyItemRemoved(position);
-                                StorageUtil.saveAlbums(context, albums);
-                            })
-                            .setNegativeButton("Cancel", null)
-                            .show();
-                    }
-                })
-                .show();
-            return true;
+                            }
+                            if (nameExists) {
+                                android.widget.Toast.makeText(context, "Album name already exists", android.widget.Toast.LENGTH_SHORT).show();
+                            } else {
+                                // Use callback to notify MainActivity
+                                if (actionListener != null) {
+                                     actionListener.onRenameAlbum(holder.getAdapterPosition(), newName);
+                                }
+                            }
+                        } else if (newName.isEmpty()) {
+                             android.widget.Toast.makeText(context, "Album name cannot be empty", android.widget.Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
+        });
+
+        holder.deleteButton.setOnClickListener(v -> {
+            new AlertDialog.Builder(context)
+                    .setTitle("Delete Album")
+                    .setMessage("Are you sure you want to delete the album '" + album.getName() + "'?")
+                    .setPositiveButton("Delete", (dialog, which) -> {
+                        // Use callback to notify MainActivity
+                        if (actionListener != null) {
+                            actionListener.onDeleteAlbum(holder.getAdapterPosition());
+                        }
+                    })
+                    .setNegativeButton("Cancel", null)
+                    .show();
         });
     }
 
@@ -86,11 +105,15 @@ public class AlbumAdapter extends RecyclerView.Adapter<AlbumAdapter.AlbumViewHol
     static class AlbumViewHolder extends RecyclerView.ViewHolder {
         TextView albumName;
         TextView photoCount;
+        Button renameButton;
+        Button deleteButton;
 
         public AlbumViewHolder(@NonNull View itemView) {
             super(itemView);
             albumName = itemView.findViewById(R.id.albumName);
             photoCount = itemView.findViewById(R.id.photoCount);
+            renameButton = itemView.findViewById(R.id.renameAlbumButton);
+            deleteButton = itemView.findViewById(R.id.deleteAlbumButton);
         }
     }
 } 
