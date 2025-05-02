@@ -2,6 +2,7 @@ package com.group25.photos;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,9 +41,25 @@ public class PhotoAdapter extends RecyclerView.Adapter<PhotoAdapter.PhotoViewHol
     public void onBindViewHolder(@NonNull PhotoViewHolder holder, int position) {
         Photo photo = photos.get(position);
         try {
-            holder.imageView.setImageURI(Uri.parse(photo.getUri()));
-        } catch (Exception e) {
-            holder.imageView.setImageResource(R.drawable.photo_placeholder);
+            Uri photoUri = Uri.parse(photo.getUri());
+            
+            // Define desired thumbnail size (e.g., 250x250 pixels)
+            int targetW = 250;
+            int targetH = 250;
+
+            // Load scaled bitmap
+            Bitmap thumbnail = StorageUtil.decodeSampledBitmapFromUri(context, photoUri, targetW, targetH);
+            
+            if (thumbnail != null) {
+                 holder.imageView.setImageBitmap(thumbnail);
+            } else {
+                 // Set placeholder if bitmap loading fails
+                 holder.imageView.setImageResource(R.drawable.photo_placeholder); 
+            }
+        } catch (Exception e) { 
+            // Catch any exceptions during URI parsing or loading
+             holder.imageView.setImageResource(R.drawable.photo_placeholder); 
+             e.printStackTrace(); // Log the error
         }
 
         holder.imageView.setOnClickListener(v -> {

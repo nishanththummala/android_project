@@ -1,5 +1,7 @@
 package com.group25.photos;
 
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.widget.ImageView;
@@ -86,7 +88,29 @@ public class PhotoActivity extends AppCompatActivity implements TagAdapter.OnTag
         // Helper to update UI for current photo
         Runnable updatePhotoUI = () -> {
             if (photo == null) return;
-            imageView.setImageURI(android.net.Uri.parse(photo.getUri()));
+            try {
+                 // imageView.setImageURI(android.net.Uri.parse(photo.getUri())); // OLD WAY
+                 Uri photoUri = android.net.Uri.parse(photo.getUri());
+                
+                 // Define desired max size (e.g., close to screen resolution)
+                 int targetW = 1080; // Example width
+                 int targetH = 1920; // Example height
+
+                 // Load scaled bitmap
+                 Bitmap loadedBitmap = StorageUtil.decodeSampledBitmapFromUri(this, photoUri, targetW, targetH);
+                 
+                 if (loadedBitmap != null) {
+                     imageView.setImageBitmap(loadedBitmap);
+                 } else {
+                     // Set placeholder if bitmap loading fails
+                     imageView.setImageResource(R.drawable.photo_placeholder); 
+                 }
+            } catch (Exception e) { 
+                // Catch any exceptions during URI parsing or loading
+                 imageView.setImageResource(R.drawable.photo_placeholder); 
+                 e.printStackTrace(); // Log the error
+            }
+
             photoTags = photo.getTags();
             updateTagsDisplay();
             updateNavigationButtons(prevButton, nextButton);
