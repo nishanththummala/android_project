@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="tag_types">
+        <item>PERSON</item>
+        <item>LOCATION</item>
+    </string-array>
+</resources>
